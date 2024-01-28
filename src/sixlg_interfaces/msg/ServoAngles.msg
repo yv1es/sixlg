@@ -1,1 +1,1 @@
-int64[3] num
+int32[3] angles

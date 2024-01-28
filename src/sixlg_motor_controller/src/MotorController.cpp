@@ -1,4 +1,7 @@
 
+#include <sstream>
+#include <string> 
+
 #include "sixlg_motor_controller/MotorController.hpp"
 
 MotorController::MotorController()
@@ -11,5 +14,6 @@ MotorController::MotorController()
 
 void MotorController::topic_callback(const sixlg_interfaces::msg::ServoAngles msg) const
 {
-    (void)msg;
+    auto angles = msg.angles;
+    RCLCPP_INFO(this->get_logger(), "Received %d", angles[0]);
 }
