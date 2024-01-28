@@ -1,4 +1,6 @@
 {
     "sketch": "motor_controller.ino",
-    "board": "arduino:avr:uno"
+    "board": "arduino:avr:uno",
+    "port": "/dev/ttyACM0",
+    "programmer": "avrisp"
 }

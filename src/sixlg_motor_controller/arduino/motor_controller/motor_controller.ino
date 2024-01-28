@@ -1,22 +1,91 @@
 #include <Servo.h>
 
-Servo myservo;  // create servo object to control a servo
-// twelve servo objects can be created on most boards
 
-int pos = 0;    // variable to store the servo position
+const int servoCount = 3;
+const int firstServoPin = 2;
 
-void setup() {
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+int servoAngles[servoCount];
+Servo servos[servoCount];
+
+const int numChars = servoCount * 4 + 5; 
+char receivedChars[numChars];
+boolean newData = false;
+
+void setup()
+{
+  Serial.begin(230400);
+
+  for (int i = 0; i < servoCount; i++)
+  {
+    Servo s;
+    s.attach(firstServoPin + i);
+    servos[i] = s;
+  }
 }
 
-void loop() {
-  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
-    // in steps of 1 degree
-    myservo.write(pos);              // tell servo to go to position in variable 'pos'
-    delay(15);                       // waits 15ms for the servo to reach the position
+void loop()
+{
+  recvWithStartEndMarkers();
+  if (newData == true)
+  {
+    parseData();
+    for (int i = 0; i < servoCount; i++) {
+      servos[i].write(servoAngles[i]); 
+    }
+    newData = false;
   }
-  for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
-    myservo.write(pos);              // tell servo to go to position in variable 'pos'
-    delay(15);                       // waits 15ms for the servo to reach the position
+}
+
+void recvWithStartEndMarkers()
+{
+  static boolean recvInProgress = false;
+  static byte ndx = 0;
+  char startMarker = '<';
+  char endMarker = '>';
+  char rc;
+
+  while (Serial.available() > 0 && newData == false)
+  {
+    rc = Serial.read();
+
+    if (recvInProgress == true)
+    {
+      if (rc != endMarker)
+      {
+        receivedChars[ndx] = rc;
+        ndx++;
+        if (ndx >= numChars)
+        {
+          ndx = numChars - 1;
+        }
+      }
+      else
+      {
+        receivedChars[ndx] = '\0'; // terminate the string
+        recvInProgress = false;
+        ndx = 0;
+        newData = true;
+      }
+    }
+
+    else if (rc == startMarker)
+    {
+      recvInProgress = true;
+    }
+  }
+}
+
+void parseData()
+{ 
+  char *token;
+  int i = 0; 
+
+  token = strtok(receivedChars, ",");
+  servoAngles[i++] = atoi(token); 
+
+  while (token != NULL)
+  {
+    token = strtok(NULL, ",");
+    servoAngles[i++] = atoi(token); 
   }
 }

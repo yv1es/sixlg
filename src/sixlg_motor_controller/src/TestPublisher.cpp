@@ -24,7 +24,11 @@ void TestPublisher::timer_callback()
 
     std::array<int32_t, 3> angles;
 
-    angles[0] = ++m_count % 180;
+    angles[0] = m_count % 180;
+    angles[1] = 180 - m_count*2 % 180; 
+    angles[2] = m_count/2 % 180; 
+
+    m_count += 10; 
 
     msg.angles = angles;
 
