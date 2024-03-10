@@ -35,8 +35,6 @@ MotorController::MotorController()
     }
 }
 
-void moveLegTrajectory()
-
 
 void MotorController::moveLegXYZ(double X, double Y, double Z)
 {
