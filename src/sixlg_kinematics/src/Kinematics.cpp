@@ -21,7 +21,7 @@ Kinematics::Kinematics()
     RCLCPP_INFO(this->get_logger(), "Kinematics node up!");
     m_publisher = create_publisher<sixlg_interfaces::msg::ServoAngles>("sixlg/servo_angles", 10);
     m_timer = create_wall_timer(
-        std::chrono::milliseconds(2000), [this]()
+        std::chrono::milliseconds(1500), [this]()
         { timer_callback(); });
 }
 
@@ -38,37 +38,35 @@ void Kinematics::makeStep()
 {
     RCLCPP_INFO(this->get_logger(), "Make step");
     sixlg_interfaces::msg::ServoAngles servoAngles;
-    std::array<_Float32, 18> angles;
-    servoAngles.angles = angles;
-    for (auto& angle : angles)
-    {
-        angle = 0;
+    for (int i = 0; i < servoAngles.angles.size(); i++) {
+        servoAngles.angles[i] = 0; 
     }
 
     uint samples = 20;
-    const auto delay = std::chrono::milliseconds(100);
+    const auto delay = std::chrono::milliseconds(30);
 
     auto push = m_legs[0].computeJointStatesFromTrajectory({
-                                                               {0.05, 0.12, -0.07},
-                                                               {-0.05, 0.12, -0.07},
-                                                           },
-                                                           InterpolationSchema::Linear, samples);
+        {0.12, 0.1, -0.1},
+        {0.0, 0.1, -0.1}, 
+        {-0.12, 0.1, -0.1}, },
+        samples);
 
     auto pull = m_legs[0].computeJointStatesFromTrajectory({
-                                                               {-0.05, 0.12, -0.07},
-                                                               {0.00, 0.12, -0.02},
-                                                               {0.05, 0.12, -0.07},
-                                                           },
-                                                           InterpolationSchema::QuadraticBezier, samples);
+        {-0.12, 0.1, -0.1},
+        {0.0, 0.1,  0.05},
+        {0.12, 0.1, -0.1},
+        },
+        samples);
 
     // concat
     push.insert(push.end(), pull.begin(), pull.end());
 
     for (const auto jointStates : push)
     {
-        angles[0] = jointStates[0];
-        angles[1] = jointStates[1];
-        angles[2] = jointStates[2];
+        servoAngles.angles[0] = jointStates[0];
+        servoAngles.angles[1] = jointStates[1];
+        servoAngles.angles[2] = jointStates[2];
+
         m_publisher->publish(servoAngles);
         std::this_thread::sleep_for(delay);
     }

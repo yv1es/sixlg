@@ -17,10 +17,10 @@ public:
     Leg(uint32_t index);
     ~Leg() = default;
 
-    std::vector<Vector3> computeJointStatesFromTrajectory(const std::vector<Vector3>& points, const InterpolationSchema interpolationSchema, const uint32_t samples) const; 
+    std::vector<Vector3> computeJointStatesFromTrajectory(const std::vector<Vector3>& points, const uint32_t samples) const; 
 
 private:
-    Vector3 computeJointStatesFromXYZ(Vector3 xyz);
+    Vector3 computeJointStatesFromXYZ(Vector3 xyz) const;
 
     const uint32_t m_index;
 

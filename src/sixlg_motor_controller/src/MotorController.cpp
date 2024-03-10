@@ -31,11 +31,17 @@ void MotorController::writeServoAngles(const std::array<_Float32, SERVO_COUNT> a
 {
     std::ostringstream strm;
     strm << "<";
-    for (const auto angle : angles)
-    {
-        int32_t deg = angle * 180 / M_PI;
+
+    for (uint i = 0; i < 3; i++) {
+        int32_t deg = angles[i] * 180 / M_PI;
         strm << deg << ",";
     }
+
+//    for (const auto angle : angles)
+//    {
+//        int32_t deg = angle * 180 / M_PI;
+//        strm << deg << ",";
+//    }
     strm.seekp(-1, strm.cur);
     strm << ">";
 
