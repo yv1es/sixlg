@@ -7,14 +7,13 @@
 
 #include "sixlg_motor_controller/TestPublisher.hpp"
 
-using namespace std::chrono_literals;
 
 TestPublisher::TestPublisher()
     : Node("test_publisher"), m_count(0)
 {
     m_publisher = create_publisher<sixlg_interfaces::msg::ServoAngles>("topic", 10);
     m_timer = create_wall_timer(
-        500ms, [this]()
+        std::chrono::microseconds(500), [this]()
         { timer_callback(); });
 }
 

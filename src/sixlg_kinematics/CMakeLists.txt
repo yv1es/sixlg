@@ -15,10 +15,10 @@ find_package(sixlg_interfaces REQUIRED)
 include_directories(include)
 
 add_library(Leg src/Leg.cpp)
-ament_target_dependencies(Leg sixlg_interfaces)
+ament_target_dependencies(Leg sixlg_interfaces rclcpp )
 add_library(Kinematics src/Kinematics.cpp)
 target_link_libraries(Kinematics Leg)
-ament_target_dependencies(Kinematics sixlg_interfaces rclcpp)
+ament_target_dependencies(Kinematics sixlg_interfaces rclcpp )
 
 
 add_executable(kinematics src/kinematics.cpp)

@@ -2,7 +2,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sixlg_kinematics/Kinematics.hpp"
 
-
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);

@@ -26,16 +26,15 @@ target_link_libraries(motor_controller SerialPort MotorController)
 
 
 # building test_publisher
-add_library(TestPublisher src/TestPublisher.cpp)
-ament_target_dependencies(TestPublisher sixlg_interfaces rclcpp)
+# add_library(TestPublisher src/TestPublisher.cpp)
+# ament_target_dependencies(TestPublisher sixlg_interfaces rclcpp)
 
-add_executable(test_publisher src/test_publisher.cpp)
-ament_target_dependencies(test_publisher rclcpp)
-target_link_libraries(test_publisher TestPublisher)
+# add_executable(test_publisher src/test_publisher.cpp)
+# ament_target_dependencies(test_publisher rclcpp)
+# target_link_libraries(test_publisher TestPublisher)
 
 
 install(TARGETS
-  test_publisher
   motor_controller
   DESTINATION lib/${PROJECT_NAME})
 
