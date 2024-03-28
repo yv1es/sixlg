@@ -1,24 +1,25 @@
 #include <Servo.h>
 
 
-const int servoCount = 3;
-const int firstServoPin = 2;
+const int servoCount = 18;
+const int firstServoPin = 22;
 
 int servoAngles[servoCount];
 Servo servos[servoCount];
 
-const int numChars = servoCount * 4 + 5; 
+const int numChars = servoCount * 4 + 2; 
 char receivedChars[numChars];
 boolean newData = false;
 
 void setup()
 {
-  Serial.begin(230400);
+  Serial.begin(115200);
 
   for (int i = 0; i < servoCount; i++)
   {
     Servo s;
-    s.attach(firstServoPin + i);
+    s.write(90); 
+    s.attach(firstServoPin + i); 
     servos[i] = s;
   }
 }

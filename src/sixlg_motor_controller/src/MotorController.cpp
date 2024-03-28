@@ -11,14 +11,14 @@
 
 MotorController::MotorController()
     : Node("sixlg_motor_controller"),
-      serialPort{mn::CppLinuxSerial::SerialPort("/dev/ttyACM0", mn::CppLinuxSerial::BaudRate::B_230400, mn::CppLinuxSerial::NumDataBits::EIGHT, mn::CppLinuxSerial::Parity::NONE, mn::CppLinuxSerial::NumStopBits::ONE)}
+      serialPort{mn::CppLinuxSerial::SerialPort("/dev/ttyACM0", mn::CppLinuxSerial::BaudRate::B_115200, mn::CppLinuxSerial::NumDataBits::EIGHT, mn::CppLinuxSerial::Parity::NONE, mn::CppLinuxSerial::NumStopBits::ONE)}
 {
     subscription = create_subscription<sixlg_interfaces::msg::ServoAngles>(
         "sixlg/servo_angles", 10, [this](const sixlg_interfaces::msg::ServoAngles msg)
         { servoAnglesCallback(msg); });
 
     serialPort.Open();
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Arduino resets after opening serial connection
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Arduino resets after opening serial connection
     RCLCPP_INFO(this->get_logger(), "MotorController is up!");
 }
 
@@ -32,16 +32,12 @@ void MotorController::writeServoAngles(const std::array<_Float32, SERVO_COUNT> a
     std::ostringstream strm;
     strm << "<";
 
-    for (uint i = 0; i < 3; i++) {
-        int32_t deg = angles[i] * 180 / M_PI;
+    for (const auto angle : angles)
+    {
+        int32_t deg = angle * 180 / M_PI;
         strm << deg << ",";
     }
 
-//    for (const auto angle : angles)
-//    {
-//        int32_t deg = angle * 180 / M_PI;
-//        strm << deg << ",";
-//    }
     strm.seekp(-1, strm.cur);
     strm << ">";
 

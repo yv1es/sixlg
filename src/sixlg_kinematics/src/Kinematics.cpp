@@ -7,6 +7,14 @@
 #include <memory>
 #include <string>
 
+/* 
+    5-----0
+   /       \
+  4         1
+   \       /
+    3-----2
+*/
+
 Kinematics::Kinematics()
     : Node("sixlg_kinematics"),
       m_legs({
@@ -38,25 +46,27 @@ void Kinematics::makeStep()
 {
     RCLCPP_INFO(this->get_logger(), "Make step");
     sixlg_interfaces::msg::ServoAngles servoAngles;
-    for (int i = 0; i < servoAngles.angles.size(); i++) {
-        servoAngles.angles[i] = 0; 
+    for (size_t i = 0; i < servoAngles.angles.size(); i++)
+    {
+        servoAngles.angles[i] = 0;
     }
 
     uint samples = 20;
-    const auto delay = std::chrono::milliseconds(30);
+    const auto delay = std::chrono::milliseconds(40);
 
     auto push = m_legs[0].computeJointStatesFromTrajectory({
-        {0.12, 0.1, -0.1},
-        {0.0, 0.1, -0.1}, 
-        {-0.12, 0.1, -0.1}, },
-        samples);
+                                                               {0.12, 0.1, -0.1},
+                                                               {0.0, 0.1, -0.1},
+                                                               {-0.12, 0.1, -0.1},
+                                                           },
+                                                           samples);
 
     auto pull = m_legs[0].computeJointStatesFromTrajectory({
-        {-0.12, 0.1, -0.1},
-        {0.0, 0.1,  0.05},
-        {0.12, 0.1, -0.1},
-        },
-        samples);
+                                                               {-0.12, 0.1, -0.1},
+                                                               {0.0, 0.1, 0.05},
+                                                               {0.12, 0.1, -0.1},
+                                                           },
+                                                           samples);
 
     // concat
     push.insert(push.end(), pull.begin(), pull.end());
@@ -66,6 +76,11 @@ void Kinematics::makeStep()
         servoAngles.angles[0] = jointStates[0];
         servoAngles.angles[1] = jointStates[1];
         servoAngles.angles[2] = jointStates[2];
+
+
+        servoAngles.angles[3] = M_PI - jointStates[0];
+        servoAngles.angles[4] = M_PI -jointStates[1];
+        servoAngles.angles[5] = M_PI -jointStates[2];
 
         m_publisher->publish(servoAngles);
         std::this_thread::sleep_for(delay);

@@ -33,10 +33,12 @@ Vector3 Leg::computeJointStatesFromXYZ(Vector3 xyz) const
     double l = std::sqrt(l_sqr);
 
     double J1 = std::atan(X / Y) + M_PI / 2;
+    J1 = M_PI - J1; 
 
     double J2 = std::acos((lF_sqr + l_sqr - lT_sqr) / (2 * m_lF * l)) - std::atan(-Z / l) + M_PI / 2;
 
     double J3 = std::acos((lF_sqr + lT_sqr - l_sqr) / (2 * m_lF * m_lT));
+    J3 = M_PI - J3; 
 
     return {J1, J2, J3};
 }
