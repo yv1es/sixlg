@@ -11,13 +11,13 @@
 
 MotorController::MotorController()
     : Node("sixlg_motor_controller"),
-      serialPort{mn::CppLinuxSerial::SerialPort("/dev/ttyACM0", mn::CppLinuxSerial::BaudRate::B_115200, mn::CppLinuxSerial::NumDataBits::EIGHT, mn::CppLinuxSerial::Parity::NONE, mn::CppLinuxSerial::NumStopBits::ONE)}
+      m_serialPort{mn::CppLinuxSerial::SerialPort("/dev/ttyACM0", mn::CppLinuxSerial::BaudRate::B_115200, mn::CppLinuxSerial::NumDataBits::EIGHT, mn::CppLinuxSerial::Parity::NONE, mn::CppLinuxSerial::NumStopBits::ONE)}
 {
-    subscription = create_subscription<sixlg_interfaces::msg::ServoAngles>(
+    m_subscription = create_subscription<sixlg_interfaces::msg::ServoAngles>(
         "sixlg/servo_angles", 10, [this](const sixlg_interfaces::msg::ServoAngles msg)
         { servoAnglesCallback(msg); });
 
-    serialPort.Open();
+    m_serialPort.Open();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Arduino resets after opening serial connection
     RCLCPP_INFO(this->get_logger(), "MotorController is up!");
 }
@@ -41,7 +41,7 @@ void MotorController::writeServoAngles(const std::array<_Float32, SERVO_COUNT> a
     strm.seekp(-1, strm.cur);
     strm << ">";
 
-    serialPort.Write(strm.str());
+    m_serialPort.Write(strm.str());
 
     RCLCPP_INFO(this->get_logger(), "Sending %s to Arduino", strm.str().c_str());
 }

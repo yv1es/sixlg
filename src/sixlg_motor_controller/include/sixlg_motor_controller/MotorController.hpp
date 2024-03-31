@@ -17,6 +17,6 @@ private:
     void servoAnglesCallback(const sixlg_interfaces::msg::ServoAngles msg);
     void writeServoAngles(const std::array<_Float32, SERVO_COUNT> angles); 
 
-    rclcpp::Subscription<sixlg_interfaces::msg::ServoAngles>::SharedPtr subscription;
-    mn::CppLinuxSerial::SerialPort serialPort; 
+    rclcpp::Subscription<sixlg_interfaces::msg::ServoAngles>::SharedPtr m_subscription;
+    mn::CppLinuxSerial::SerialPort m_serialPort; 
 };

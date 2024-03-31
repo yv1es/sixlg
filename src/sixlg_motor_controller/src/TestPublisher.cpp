@@ -9,7 +9,7 @@
 
 
 TestPublisher::TestPublisher()
-    : Node("test_publisher"), m_count(0)
+    : Node("sixlg_test_publisher"), m_count(0)
 {
     m_publisher = create_publisher<sixlg_interfaces::msg::ServoAngles>("topic", 10);
     m_timer = create_wall_timer(

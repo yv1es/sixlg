@@ -25,22 +25,18 @@ Vector3 Leg::computeJointStatesFromXYZ(Vector3 xyz) const
     double Z = xyz[2];
 
     double lF_sqr = std::pow(m_lF, 2);
-
     double lT_sqr = std::pow(m_lT, 2);
 
     double L_sqr = std::pow(X, 2) + std::pow(Y, 2);
     double l_sqr = L_sqr + std::pow(Z, 2);
     double l = std::sqrt(l_sqr);
 
-    double J1 = std::atan(X / Y) + M_PI / 2;
-    J1 = M_PI - J1; 
+    double J0 = std::atan(X / Y) + M_PI / 2;
+    double J1 = std::acos((lF_sqr + l_sqr - lT_sqr) / (2 * m_lF * l)) - std::atan(-Z / l) + M_PI / 2;
+    double J2 = std::acos((lF_sqr + lT_sqr - l_sqr) / (2 * m_lF * m_lT));
+    J2 = M_PI - J2; 
 
-    double J2 = std::acos((lF_sqr + l_sqr - lT_sqr) / (2 * m_lF * l)) - std::atan(-Z / l) + M_PI / 2;
-
-    double J3 = std::acos((lF_sqr + lT_sqr - l_sqr) / (2 * m_lF * m_lT));
-    J3 = M_PI - J3; 
-
-    return {J1, J2, J3};
+    return {J0, J1, J2};
 }
 
 std::vector<Vector3> Leg::computeJointStatesFromTrajectory(const std::vector<Vector3> &points,  const uint32_t samples) const

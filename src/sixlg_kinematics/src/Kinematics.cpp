@@ -26,11 +26,11 @@ Kinematics::Kinematics()
           Leg(5),
       })
 {
-    RCLCPP_INFO(this->get_logger(), "Kinematics node up!");
     m_publisher = create_publisher<sixlg_interfaces::msg::ServoAngles>("sixlg/servo_angles", 10);
     m_timer = create_wall_timer(
         std::chrono::milliseconds(1500), [this]()
         { timer_callback(); });
+    RCLCPP_INFO(this->get_logger(), "Kinematics node up!");
 }
 
 void Kinematics::publishServoAnlges(std::array<_Float32, 18> &angles)
@@ -51,8 +51,8 @@ void Kinematics::makeStep()
         servoAngles.angles[i] = 0;
     }
 
-    uint samples = 20;
-    const auto delay = std::chrono::milliseconds(40);
+    uint samples = 60;
+    const auto delay = std::chrono::milliseconds(20);
 
     auto push = m_legs[0].computeJointStatesFromTrajectory({
                                                                {0.12, 0.1, -0.1},
