@@ -71,20 +71,12 @@ void Kinematics::makeStep()
     // concat
     push.insert(push.end(), pull.begin(), pull.end());
 
-    for (const auto jointStates : push)
-    {
-        servoAngles.angles[0] = jointStates[0];
-        servoAngles.angles[1] = jointStates[1];
-        servoAngles.angles[2] = jointStates[2];
+    for (auto& angle : servoAngles.angles) {
+        angle = M_PI/2; 
+    } 
+    m_publisher->publish(servoAngles);
 
-
-        servoAngles.angles[3] = M_PI - jointStates[0];
-        servoAngles.angles[4] = M_PI -jointStates[1];
-        servoAngles.angles[5] = M_PI -jointStates[2];
-
-        m_publisher->publish(servoAngles);
-        std::this_thread::sleep_for(delay);
-    }
+    std::this_thread::sleep_for(delay);
 }
 
 void Kinematics::timer_callback()
