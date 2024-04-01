@@ -22,4 +22,6 @@ private:
     void timer_callback();
     rclcpp::TimerBase::SharedPtr m_timer;
     rclcpp::Publisher<sixlg_interfaces::msg::ServoAngles>::SharedPtr m_publisher;
+
+    double m_t; 
 };

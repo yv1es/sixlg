@@ -15,7 +15,7 @@
 
     <xacro:property name="femur_length" value="0.08"/>
     <xacro:property name="tibia_length" value="0.12"/>
-    <xacro:property name="front_leg_angle" value="${pi/4}"/>
+    <xacro:property name="angle_to_font" value="${pi/4}"/>
 
 
     <!-- BASE LINK -->
@@ -54,7 +54,7 @@
 
     <!-- LEGS -->
     <xacro:right_leg name="leg0" parent="body_link">
-            <origin xyz="${body_length/2} -${body_width/2} 0" rpy="0 0 ${pi + front_leg_angle}"/>
+            <origin xyz="${body_length/2} -${body_width/2} 0" rpy="0 0 ${pi + angle_to_font}"/>
     </xacro:right_leg>
 
     <xacro:right_leg name="leg1" parent="body_link">
@@ -62,12 +62,12 @@
     </xacro:right_leg>
 
     <xacro:right_leg name="leg2" parent="body_link">
-            <origin xyz="-${body_length/2} -${body_width/2} 0" rpy="0 0 ${pi - front_leg_angle}"/>
+            <origin xyz="-${body_length/2} -${body_width/2} 0" rpy="0 0 ${pi - angle_to_font}"/>
     </xacro:right_leg>
 
 
     <xacro:left_leg name="leg3" parent="body_link">
-            <origin xyz="-${body_length/2} ${body_width/2} 0" rpy="0 0 ${front_leg_angle}"/>
+            <origin xyz="-${body_length/2} ${body_width/2} 0" rpy="0 0 ${angle_to_font}"/>
     </xacro:left_leg>
 
     <xacro:left_leg name="leg4" parent="body_link">
@@ -75,7 +75,7 @@
     </xacro:left_leg>
 
     <xacro:left_leg name="leg5" parent="body_link">
-            <origin xyz="${body_length/2} ${body_width/2} 0" rpy="0 0 -${front_leg_angle}"/>
+            <origin xyz="${body_length/2} ${body_width/2} 0" rpy="0 0 -${angle_to_font}"/>
     </xacro:left_leg>
 
 </robot>
