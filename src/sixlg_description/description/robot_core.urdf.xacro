@@ -5,6 +5,7 @@
     <xacro:include filename="inertial_macros.urdf.xacro"/>
     <xacro:include filename="materials.urdf.xacro"/>
     <xacro:include filename="left_leg.urdf.xacro"/>
+    <xacro:include filename="right_leg.urdf.xacro"/>
 
 
     <!-- CONSTANTS -->
@@ -54,6 +55,10 @@
     <xacro:left_leg name="leg0" parent="body_link">
             <origin xyz="0 ${body_width/2} 0" rpy="0 0 0"/>
     </xacro:left_leg>
+
+    <xacro:right_leg name="leg1" parent="body_link">
+            <origin xyz="0 -${body_width/2} 0" rpy="0 0 ${pi}"/>
+    </xacro:right_leg>
 
 
 </robot>
