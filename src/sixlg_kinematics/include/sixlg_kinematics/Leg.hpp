@@ -2,39 +2,38 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include <Eigen/Dense>
+
+#include <array>
 #include <map> 
 #include <stdint.h>
-#include <vector>
 
-using Vector3 = std::array<double, 3>; 
 
-enum class InterpolationSchema { Linear, QuadraticBezier}; 
 enum class Side { Left, Right}; 
-enum class Stride { Forward }; 
 
 // Constants
 const double STRIDE_LENGTH = 0.1; // [m] 
 const double lF = 0.08; // [m] length Femur
 const double lT = 0.12; // [m] length Tibia
-
+const Eigen::Vector3d restingPoint{0, 0.1, -0.1}; // [m]
 
 class Leg
 {
 public:
-    Leg(uint32_t index, Side side, double angleToFront);
+    Leg(const uint32_t index, const Side side, const double angleToX);
     ~Leg() = default;
 
-    Vector3 computeJointStatesForward(const double t) const;
+    Eigen::Vector3d computeJointStates(const double t) const;
+    void computeTrajectory(const Eigen::Vector3d &walkingDirection); 
 
 private:
-    void computeTrajectories(); 
-
-    Vector3 computeJointStatesFromXYZ(const Vector3 &xyz) const;
+    Eigen::Vector3d computeJointStatesFromTipPos(const Eigen::Vector3d &tipPos) const;
+    Eigen::Vector3d quadraticBezier(const std::array<Eigen::Vector3d, 3> &points, const double t) const; 
+    Eigen::Vector3d getRobotXDirection(const double angleToX) const;  // x direction of robot in legs coordinates
 
     const uint32_t m_index;
-    const double  m_angleToFront;
     const Side m_side; 
-    std::map<Stride, std::function<Vector3(double)>> m_strideTrajectories; 
-    Vector3 quadraticBezier(const std::vector<Vector3> &points, const double t) const; 
-
+    const Eigen::Vector3d m_robotXdirection; 
+    const double m_legXAngle; // angle between the robots x-Axis and legs x-Axis 
+    std::function<Eigen::Vector3d(const double)> m_tipTrajectory; 
 };

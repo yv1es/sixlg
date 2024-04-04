@@ -12,6 +12,8 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(sixlg_interfaces REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3)
 
 include_directories(include)
 
@@ -19,10 +21,10 @@ include_directories(include)
 
 # Kinematics node
 add_library(Leg src/Leg.cpp)
-ament_target_dependencies(Leg sixlg_interfaces rclcpp )
+ament_target_dependencies(Leg sixlg_interfaces Eigen3 rclcpp )
 add_library(Kinematics src/Kinematics.cpp)
 target_link_libraries(Kinematics Leg)
-ament_target_dependencies(Kinematics sixlg_interfaces rclcpp )
+ament_target_dependencies(Kinematics sixlg_interfaces Eigen3 rclcpp )
 
 
 add_executable(kinematics src/kinematics.cpp)

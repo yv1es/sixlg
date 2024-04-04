@@ -19,18 +19,18 @@
 Kinematics::Kinematics()
     : Node("sixlg_kinematics"),
       m_legs({
-          Leg(0, Side::Right, 7 * M_PI / 4),
-          Leg(1, Side::Right, 6 * M_PI / 4),
-          Leg(2, Side::Right, 5 * M_PI / 4),
-          Leg(3, Side::Left, 3 * M_PI / 4),
-          Leg(4, Side::Left, 2 * M_PI / 4),
-          Leg(5, Side::Left, 1 * M_PI / 4),
+          Leg(0, Side::Right, -M_PI/4),
+          Leg(1, Side::Right, 0),
+          Leg(2, Side::Right, M_PI/4),
+          Leg(3, Side::Left, M_PI/4),
+          Leg(4, Side::Left, 0),
+          Leg(5, Side::Left, -M_PI/4),
       }),
       m_t(0)
 {
     m_publisher = create_publisher<sixlg_interfaces::msg::ServoAngles>("sixlg/servo_angles", 10);
     m_timer = create_wall_timer(
-        std::chrono::milliseconds(15), [this]()
+        std::chrono::milliseconds(20), [this]()
         { timer_callback(); });
     RCLCPP_INFO(this->get_logger(), "Kinematics node up!");
 }
@@ -58,7 +58,7 @@ void Kinematics::makeStep()
             t = std::fmod(m_t + 0.5, 1); 
         }
 
-        const Vector3 jointStates = m_legs.at(i).computeJointStatesForward(t); 
+        const Eigen::Vector3d jointStates = m_legs.at(i).computeJointStates(t); 
         servoAngles.angles[i*3 + 0] = jointStates[0]; 
         servoAngles.angles[i*3 + 1] = jointStates[1]; 
         servoAngles.angles[i*3 + 2] = jointStates[2]; 

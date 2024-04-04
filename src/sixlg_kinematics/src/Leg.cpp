@@ -3,101 +3,110 @@
 
 #include <cmath>
 
-namespace
+Leg::Leg(const uint index, const Side side, const double angleToX) : m_index(index),
+                                                                     m_side(side),
+                                                                     m_robotXdirection(getRobotXDirection(angleToX)),
+                                                                     m_legXAngle(angleToX)
 {
-    Vector3 add(Vector3 a, Vector3 b)
-    {
-        return {a[0] + b[0], a[1] + b[1], a[2] + b[2]};
-    }
-
-    Vector3 scale(double t, Vector3 a)
-    {
-        return Vector3{a[0] * t, a[1] * t, a[2] * t};
-    }
+    computeTrajectory({-1, 0, 0}); 
 }
 
-Leg::Leg(uint32_t index, Side side, double angleToFront) : m_index(index),
-                                                           m_angleToFront(angleToFront),
-                                                           m_side(side)
-{
-    computeTrajectories(); 
+
+Eigen::Vector3d Leg::computeJointStates(const double t) const {
+    return computeJointStatesFromTipPos(m_tipTrajectory(t)); 
 }
 
-void Leg::computeTrajectories()
+/*
+ * Walking direction in robots coordinate system (base_link)
+ */
+void Leg::computeTrajectory(const Eigen::Vector3d &walkingDirection)
 {
-    const auto forward = [this](double t) -> Vector3
+    Eigen::Vector3d step = STRIDE_LENGTH * walkingDirection.normalized();
+    if (m_side == Side::Right) {
+        step[1] *= -1; // mirror y Axis
+    }
+
+    // rotation around Z-axis
+    Eigen::Matrix3d rotationMatrix;
+    rotationMatrix << cos(-m_legXAngle), -sin(-m_legXAngle), 0,
+        sin(-m_legXAngle), cos(-m_legXAngle), 0,
+        0, 0, 1;
+
+    step = rotationMatrix * step;
+
+    Eigen::Vector3d front = 0.5 * step + restingPoint;
+    Eigen::Vector3d middle = restingPoint;
+    Eigen::Vector3d back = -0.5 * step + restingPoint;
+    Eigen::Vector3d arch = restingPoint + Eigen::Vector3d{0, 0, 0.15};
+
+    m_tipTrajectory = [this, front, middle, back, arch](double t) -> Eigen::Vector3d
     {
         assert(0 <= t && t <= 1);
         if (t < 0.5)
         {
             // push
             t = t * 2;
-            return quadraticBezier({
-                                       {STRIDE_LENGTH / 2, 0.1, -0.1},
-                                       {0, 0.1, -0.1},
-                                       {-STRIDE_LENGTH / 2, 0.1, -0.1},
-                                   },
-                                   t);
+            return quadraticBezier({front, middle, back}, t);
         }
         else
         {
             // pull
             t = (t - 0.5) * 2;
-            return quadraticBezier({
-                                       {-STRIDE_LENGTH / 2, 0.1, -0.1},
-                                       {0, 0.1, 0.05},
-                                       {STRIDE_LENGTH / 2, 0.1, -0.1},
-                                   },
-                                   t);
+            return quadraticBezier({back, arch, front}, t);
         }
     };
-    m_strideTrajectories[Stride::Forward] = forward; 
 }
 
+Eigen::Vector3d Leg::getRobotXDirection(const double angleToX) const
+{
+    // rotation around Z-axis
+    Eigen::Matrix3d rotationMatrix;
+    rotationMatrix << cos(angleToX), -sin(angleToX), 0,
+        sin(angleToX), cos(angleToX), 0,
+        0, 0, 1;
 
-Vector3 Leg::computeJointStatesForward(const double t) const {
-    return computeJointStatesFromXYZ(m_strideTrajectories.at(Stride::Forward)(t)); 
+    return rotationMatrix * Eigen::Vector3d(1, 0, 0);
 }
-
 
 /*
- * Inverse kinematics to transform leg tip point to joint states
+ * Inverse kinematics to transform leg tip goal position to joint states
  */
-Vector3 Leg::computeJointStatesFromXYZ(const Vector3 &xyz) const
+Eigen::Vector3d Leg::computeJointStatesFromTipPos(const Eigen::Vector3d &tipPos) const
 {
-    double X = xyz[0];
-    double Y = xyz[1];
-    double Z = xyz[2];
+    const double X = tipPos[0];
+    const double Y = tipPos[1];
+    const double Z = tipPos[2];
 
-    std::cout << "XYZ = " << X << ";" << Y << ";" << Z << ";\n"; 
+    const double lF_sqr = std::pow(lF, 2);
+    const double lT_sqr = std::pow(lT, 2);
 
-    double lF_sqr = std::pow(lF, 2);
-    double lT_sqr = std::pow(lT, 2);
-
-    double L_sqr = std::pow(X, 2) + std::pow(Y, 2);
-    double l_sqr = L_sqr + std::pow(Z, 2);
-    double l = std::sqrt(l_sqr);
+    const double L_sqr = std::pow(X, 2) + std::pow(Y, 2);
+    const double l_sqr = L_sqr + std::pow(Z, 2);
+    const double l = std::sqrt(l_sqr);
 
     double J0 = std::atan(X / Y) + M_PI / 2;
     double J1 = std::acos((lF_sqr + l_sqr - lT_sqr) / (2 * lF * l)) - std::atan(-Z / l) + M_PI / 2;
-    double J2 = std::acos((lF_sqr + lT_sqr - l_sqr) / (2 * lF * lT));
-    J2 = M_PI - J2;
+    double J2 = M_PI - std::acos((lF_sqr + lT_sqr - l_sqr) / (2 * lF * lT));
 
-    if (m_side == Side::Right)
+    Eigen::Vector3d jointStates{J0, J1, J2};
+
+    switch (m_side)
     {
-        J0 = M_PI - J0;
-        J1 = M_PI - J1;
-        J2 = M_PI - J2;
+    case Side::Right:
+        return Eigen::Vector3d::Constant(M_PI) - jointStates;
+    case Side::Left:
+        return jointStates;
+    default:
+        std::cerr << "Unknown side" << std::endl;
+        assert(false);
+        return jointStates; // dummy return 
     }
-    return {J0, J1, J2};
 }
 
-
-Vector3 Leg::quadraticBezier(const std::vector<Vector3> &points, const double t) const
+/*
+ * Quadratic Bezier interpolation
+ */
+Eigen::Vector3d Leg::quadraticBezier(const std::array<Eigen::Vector3d, 3> &points, const double t) const
 {
-    const auto curve = [&points](double t)
-    {
-        return add(scale(1 - t, (add(scale(1 - t, points[0]), scale(t, points[1])))), scale(t, add(scale(1 - t, points[1]), scale(t, points[2]))));
-    };
-    return curve(t);
+    return (1 - t) * ((1 - t) * points[0] + t * points[1]) + t * ((1 - t) * points[1] + t * points[2]);
 }
