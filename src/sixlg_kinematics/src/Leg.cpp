@@ -8,12 +8,12 @@ Leg::Leg(const uint index, const Side side, const double angleToX) : m_index(ind
                                                                      m_robotXdirection(getRobotXDirection(angleToX)),
                                                                      m_legXAngle(angleToX)
 {
-    computeTrajectory({-1, 0, 0}); 
+    computeTrajectory({1, 0, 0});
 }
 
-
-Eigen::Vector3d Leg::computeJointStates(const double t) const {
-    return computeJointStatesFromTipPos(m_tipTrajectory(t)); 
+Eigen::Vector3d Leg::computeJointStates(const double t) const
+{
+    return computeJointStatesFromTipPos(m_tipTrajectory(t));
 }
 
 /*
@@ -22,7 +22,8 @@ Eigen::Vector3d Leg::computeJointStates(const double t) const {
 void Leg::computeTrajectory(const Eigen::Vector3d &walkingDirection)
 {
     Eigen::Vector3d step = STRIDE_LENGTH * walkingDirection.normalized();
-    if (m_side == Side::Right) {
+    if (m_side == Side::Right)
+    {
         step[1] *= -1; // mirror y Axis
     }
 
@@ -99,7 +100,7 @@ Eigen::Vector3d Leg::computeJointStatesFromTipPos(const Eigen::Vector3d &tipPos)
     default:
         std::cerr << "Unknown side" << std::endl;
         assert(false);
-        return jointStates; // dummy return 
+        return jointStates; // dummy return
     }
 }
 

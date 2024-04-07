@@ -1,7 +1,6 @@
 {
     "sketch": "motor_controller.ino",
-    "board": "arduino:avr:mega",
+    "board": "arduino:avr:uno",
     "port": "/dev/ttyACM0",
-    "programmer": "avrisp",
-    "configuration": "cpu=atmega2560"
+    "programmer": "avrisp"
 }
